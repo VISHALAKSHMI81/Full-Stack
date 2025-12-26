@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creator Signup - VibeStream</title>
+
+  <style>
+    /* SAME CSS AS ABOVE */
+     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+    body {
+      height: 100vh;
+      background: linear-gradient(135deg, #6d00ff, #ff00b8, #00c6ff);
+      background-size: 300% 300%;
+      animation: gradientMove 8s ease infinite;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+    }
+
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .card {
+      width: 350px;
+      padding: 30px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(15px);
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+
+    .card h2 { margin-bottom: 20px; font-size: 26px; }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 10px;
+      outline: none;
+      font-size: 15px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      font-size: 17px;
+      border: none;
+      border-radius: 12px;
+      background: #fff;
+      color: #6d00ff;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      background: #6d00ff;
+      color: #fff;
+    }
+
+    a {
+      color: #fff;
+      display: block;
+      margin-top: 15px;
+      font-size: 14px;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+    <h2>Signup as Creator</h2>
+
+    <form action="/signup_creator" method="POST">
+      <input type="text" name="username" placeholder="User Name" required>
+      <input type="email" name="email" placeholder="Email ID" required>
+      <input type="text" name="phone" placeholder="Phone Number" required>
+      <input type="password" name="password" placeholder="Password" required>
+      <input type="password" name="confirm" placeholder="Confirm Password" required>
+
+      <button class="btn">Sign Up</button>
+    </form>
+
+    <a href="/login_creator">Already have an account? Login as creator</a>
+  </div>
+
+</body>
+</html>

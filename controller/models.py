@@ -1,6 +1,6 @@
 from controller.database import db
 
-
+# ------------------------- USER TABLE (ADMIN) -------------------------
 class User(db.Model):
     __tablename__ = 'user'
 
@@ -10,11 +10,8 @@ class User(db.Model):
     password_hash = db.Column(db.String(130), nullable=False)
     mobilenumber = db.Column(db.String(20), unique=True, nullable=False)
 
-    roles = db.relationship('UserRole', backref='user', lazy=True)
-    playlists = db.relationship('Playlist', backref='user', lazy=True)
 
-
-
+# ------------------------- ROLE TABLE -------------------------
 class Role(db.Model):
     __tablename__ = 'role'
 
@@ -24,67 +21,108 @@ class Role(db.Model):
     users = db.relationship('UserRole', backref='role', lazy=True)
 
 
-
+# ------------------------- USER-ROLE JOIN TABLE -------------------------
 class UserRole(db.Model):
     __tablename__ = 'user_role'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.userid'))
-    role_id = db.Column(db.Integer, db.ForeignKey('role.roleid'))
+
+    # Can store ID of EndUser or Creator
+    user_id = db.Column(db.Integer, nullable=False)
+
+    # Role link
+    role_id = db.Column(db.Integer, db.ForeignKey('role.roleid'), nullable=False)
 
 
-class Artist(db.Model):
-    __tablename__ = 'artist'
+# ------------------------- CREATOR TABLE -------------------------
+class Creator(db.Model):
+    __tablename__ = "creator"
 
     artistid = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(100), nullable=False)
-    bio = db.Column(db.Text, nullable=True)
-    image = db.Column(db.String(255), nullable=True)
+    name = db.Column(db.String(80), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(130), nullable=False)
 
-    albums = db.relationship('Album', backref='artist', lazy=True)
-    songs = db.relationship('Song', backref='artist', lazy=True)
-
-
-class Album(db.Model):
-    __tablename__ = 'album'
-
-    albumid = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    title = db.Column(db.String(120), nullable=False)
-    artist_id = db.Column(db.Integer, db.ForeignKey('artist.artistid'))
-    release_year = db.Column(db.Integer)
-    cover_image = db.Column(db.String(255))
-
-    songs = db.relationship('Song', backref='album', lazy=True)
+    # relationship
+    songs = db.relationship("Song", backref="creator", lazy=True)
 
 
+# ------------------------- END USER TABLE -------------------------
+class EndUser(db.Model):
+    __tablename__ = 'end_user'
+
+    enduserid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    username = db.Column(db.String(80), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    mobilenumber = db.Column(db.String(20), unique=True, nullable=False)
+    password_hash = db.Column(db.String(130), nullable=False)
+
+    likes = db.relationship("SongLike", backref="user", lazy=True)
+    playlists = db.relationship("Playlist", backref="user", lazy=True)
+
+
+# ===========================================================
+#        ADDITIONAL TABLES FOR CREATOR DASHBOARD
+# ===========================================================
+
+# ------------------------- SONG GENRE / CATEGORY -------------------------
+class Genre(db.Model):
+    __tablename__ = "genre"
+
+    genreid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(80), unique=True, nullable=False)
+
+    songs = db.relationship("Song", backref="genre", lazy=True)
+
+
+# ------------------------- SONG TABLE -------------------------
 class Song(db.Model):
-    __tablename__ = 'song'
+    __tablename__ = "song"
 
     songid = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    title = db.Column(db.String(120), nullable=False)
-    artist_id = db.Column(db.Integer, db.ForeignKey('artist.artistid'))
-    album_id = db.Column(db.Integer, db.ForeignKey('album.albumid'))
-    genre = db.Column(db.String(50))
-    duration = db.Column(db.String(20))
-    file_path = db.Column(db.String(255))
+    title = db.Column(db.String(150), nullable=False)
+    description = db.Column(db.Text, nullable=True)
 
-    playlist_items = db.relationship('PlaylistSong', backref='song', lazy=True)
+    audio_file = db.Column(db.String(200), nullable=False)
+    cover_image = db.Column(db.String(200), nullable=True)
 
+    # Foreign Keys
+    creator_id = db.Column(db.Integer, db.ForeignKey("creator.artistid"), nullable=False)
+    genre_id = db.Column(db.Integer, db.ForeignKey("genre.genreid"), nullable=True)
 
-class Playlist(db.Model):
-    __tablename__ = 'playlist'
+    # Analytics
+    plays = db.Column(db.Integer, default=0)
+    likes = db.Column(db.Integer, default=0)
+    uploaded_at = db.Column(db.DateTime, default=db.func.now())
 
-    playlistid = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.userid'))
-    playlist_name = db.Column(db.String(120), nullable=False)
-    description = db.Column(db.Text)
-
-    songs = db.relationship('PlaylistSong', backref='playlist', lazy=True)
+    like_records = db.relationship("SongLike", backref="song", lazy=True)
+    playlist_items = db.relationship("PlaylistSong", backref="song", lazy=True)
 
 
-class PlaylistSong(db.Model):
-    __tablename__ = 'playlist_song'
+# ------------------------- USER LIKES -------------------------
+class SongLike(db.Model):
+    __tablename__ = "song_like"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    playlist_id = db.Column(db.Integer, db.ForeignKey('playlist.playlistid'))
-    song_id = db.Column(db.Integer, db.ForeignKey('song.songid'))
+    user_id = db.Column(db.Integer, db.ForeignKey("end_user.enduserid"), nullable=False)
+    song_id = db.Column(db.Integer, db.ForeignKey("song.songid"), nullable=False)
+
+
+# ------------------------- PLAYLIST -------------------------
+class Playlist(db.Model):
+    __tablename__ = "playlist"
+
+    playlistid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("end_user.enduserid"), nullable=False)
+
+    songs = db.relationship("PlaylistSong", backref="playlist", lazy=True)
+
+
+# ------------------------- PLAYLIST SONGS -------------------------
+class PlaylistSong(db.Model):
+    __tablename__ = "playlist_song"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    playlist_id = db.Column(db.Integer, db.ForeignKey("playlist.playlistid"), nullable=False)
+    song_id = db.Column(db.Integer, db.ForeignKey("song.songid"), nullable=False)

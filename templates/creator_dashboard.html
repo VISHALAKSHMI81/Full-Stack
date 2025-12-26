@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creator Dashboard | VibeStream</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ================= VARIABLES & THEME ================= */
+        :root {
+            --brand-gradient: linear-gradient(135deg, #d946ef, #8b5cf6, #3b82f6);
+            --bg-dark: #0f172a;
+            --bg-panel: #1e293b;
+            --text-white: #ffffff;
+            --text-gray: #94a3b8;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-white);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px;
+            background: rgba(15, 23, 42, 0.95);
+            border-right: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+        }
+
+        .logo { display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: bold; margin-bottom: 40px; color: white; }
+        .logo-icon { width: 40px; height: 40px; background: var(--brand-gradient); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+        
+        .nav-menu { list-style: none; flex: 1; }
+        .nav-item { margin-bottom: 8px; }
+        .nav-link { display: flex; align-items: center; gap: 15px; padding: 12px 16px; color: var(--text-gray); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500; }
+        .nav-link:hover, .nav-link.active { background: rgba(255, 255, 255, 0.1); color: white; border-left: 4px solid #d946ef; }
+
+        /* MAIN CONTENT */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; background: linear-gradient(180deg, rgba(30, 41, 59, 0.5) 0%, var(--bg-dark) 100%); }
+        
+        header { 
+            padding: 20px 40px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+
+        .user-profile { display: flex; align-items: center; gap: 15px; background: var(--bg-panel); padding: 8px 16px; border-radius: 30px; border: 1px solid #334155; }
+        .user-avatar { width: 35px; height: 35px; border-radius: 50%; background: var(--brand-gradient); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
+
+        .dashboard-container { padding: 20px 40px; max-width: 1200px; width: 100%; margin: 0 auto; }
+
+        /* SEARCH BAR */
+        .search-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 25px;
+        }
+
+        .search-input {
+            width: 300px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: #0f172a;
+            border: 2px solid rgba(139, 92, 246, 0.6);
+            color: white;
+            outline: none;
+            font-size: 15px;
+            transition: 0.3s ease;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.4);
+        }
+
+        .search-input:focus {
+            border-color: #d946ef;
+            box-shadow: 0 0 16px rgba(217, 70, 239, 0.6);
+        }
+
+        /* UPLOAD FORM */
+        .upload-section {
+            background: var(--bg-panel);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid #334155;
+            margin-bottom: 30px;
+        }
+
+        .upload-form { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 15px; align-items: end; }
+        .form-group label { display: block; color: var(--text-gray); font-size: 12px; margin-bottom: 5px; }
+        .form-input { width: 100%; background: #0f172a; border: 1px solid #334155; color: white; padding: 10px; border-radius: 8px; outline: none; }
+        .form-input:focus { border-color: #8b5cf6; }
+        
+        .btn-upload { background: var(--brand-gradient); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-upload:hover { opacity: 0.9; }
+
+        .section-heading { margin-bottom: 20px; font-size: 18px; font-weight: 600; border-left: 4px solid #8b5cf6; padding-left: 12px; }
+        
+        .song-row { background: var(--bg-panel); border: 1px solid #334155; border-radius: 12px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; transition: transform 0.2s; }
+        .song-row:hover { transform: translateY(-2px); border-color: #8b5cf6; }
+
+        .song-info { display: flex; align-items: center; gap: 20px; }
+        .song-thumbnail { width: 50px; height: 50px; background-color: #475569; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #94a3b8; overflow: hidden; }
+        .song-thumbnail img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .song-details h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+        .song-details p { font-size: 13px; color: var(--text-gray); }
+
+        .btn { padding: 6px 15px; border-radius: 6px; font-size: 13px; cursor: pointer; border: none; transition: 0.2s; }
+        .btn-delete { background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); color: #fca5a5; }
+        .btn-delete:hover { background: var(--danger); color: white; }
+        .btn-edit { background: rgba(16, 185, 129, 0.15); border: 1px solid var(--success); color: #6ee7b7; }
+        .btn-edit:hover { background: var(--success); color:white; }
+
+        .song-audio { width: 280px; margin-right: 12px; }
+
+        /* EDIT MODAL */
+        .modal-bg {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal {
+            width: 420px;
+            background: var(--bg-panel);
+            padding: 25px;
+            border-radius: 12px;
+            border:1px solid #334155;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- EDIT POPUP -->
+    <div id="editModal" class="modal-bg">
+    <div class="modal">
+        <h3>Edit Song</h3>
+
+        <form id="editSongForm"
+              method="POST"
+              enctype="multipart/form-data">
+
+            <input type="hidden" id="editSongId">
+
+            <label>Song Title</label>
+            <input type="text" name="title" id="editTitle" class="form-input" required>
+
+            <label>Genre</label>
+            <select name="genre" id="editGenre" class="form-input">
+                <option value="Pop">Pop</option>
+                <option value="Classical">Classical</option>
+                <option value="Melody">Melody</option>
+            </select>
+
+            <label>Current Cover</label>
+            <img id="currentCover" style="width:120px; display:block; margin-bottom:10px;">
+
+           <label>Change Cover</label>
+<input type="file" name="cover" id="editCover" class="form-input">
+
+<label>Change Song File</label>
+<input type="file" name="song_file" id="editSongFile" class="form-input">
+
+
+            <label>Change Song File</label>
+            <input type="file" name="song_file" class="form-input">
+
+            <br><br>
+            <button type="submit" class="btn-upload">Save Changes</button>
+            <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+        </form>
+    </div>
+</div>
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+        <div class="logo">
+            <div class="logo-icon"><i class="fas fa-music"></i></div>
+            <span>VibeStream</span>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="#" class="nav-link active"><i class="fas fa-th-large"></i> Dashboard</a></li>
+            <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-compact-disc"></i> My Catalog</a></li>
+            <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-users"></i> Fans</a></li>
+        </ul>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <header>
+            <h2>Creator Studio</h2>
+            <div class="user-profile">
+                <span>{{ creator_name }}</span>
+                <div class="user-avatar">{{ creator_name[0:2] }}</div>
+            </div>
+        </header>
+
+        <div class="dashboard-container">
+
+            <!-- SEARCH BAR -->
+            <div class="search-wrapper">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search songs...">
+            </div>
+
+            <div class="upload-section">
+                <h3 style="margin-bottom: 15px;">Upload New Song</h3>
+
+                <form id="addSongForm" class="upload-form" action="/add_song" method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label>Song Title</label>
+                        <input type="text" name="title" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Genre</label>
+                        <select name="genre" class="form-input">
+                            <option value="">-- Select --</option>
+                            <option value="Pop">Pop</option>
+                            <option value="Classical">Classical</option>
+                            <option value="Melody">Melody</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cover Image</label>
+                        <input type="file" name="cover" class="form-input" accept="image/*" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Song File</label>
+                        <input type="file" name="song_file" class="form-input" accept="audio/*" required>
+                    </div>
+
+                    <button type="submit" class="btn-upload"><i class="fas fa-plus"></i> Add Song</button>
+                </form>
+            </div>
+
+            <h3 class="section-heading">My Uploaded Songs</h3>
+            <div id="songListContainer">
+                <p style="color: #64748b; padding: 20px;">Loading songs...</p>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+    const searchInput = document.getElementById("searchInput");
+    const songListContainer = document.getElementById("songListContainer");
+    const songForm = document.getElementById("addSongForm");
+    const editModal = document.getElementById("editModal");
+    const editForm = document.getElementById("editSongForm");
+
+    async function fetchSongs() {
+        const response = await fetch("/get_songs");
+        const songs = await response.json();
+        window.allSongs = songs; 
+        renderSongs(songs);
+    }
+
+    function renderSongs(songs) {
+        songListContainer.innerHTML = "";
+        if (!songs.length) {
+            songListContainer.innerHTML = '<p style="color:#64748b;">No songs found.</p>';
+            return;
+        }
+
+        songs.forEach(song => {
+            const html = `
+                <div class="song-row">
+                    <div class="song-info">
+                        <div class="song-thumbnail">
+                            ${song.cover_url ? `<img src="${song.cover_url}">` : `<i class="fas fa-music"></i>`}
+                        </div>
+                        <div class="song-details">
+                            <h3>${song.title}</h3>
+                            <p>Genre: ${song.genre}</p>
+                        </div>
+                    
+                    </div>
+
+                    <div style="display:flex; align-items:center; gap:12px;">
+
+                        <audio class="song-audio" controls>
+                            <source src="${song.audio_url}" type="audio/mpeg">
+                        </audio>
+
+                        <button class="btn btn-edit" onclick='openEdit(${JSON.stringify(song)})'>
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+
+                        <button class="btn btn-delete" onclick="deleteSong(${song.id})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+            songListContainer.innerHTML += html;
+        });
+    }
+
+    // SEARCH
+    searchInput.addEventListener("input", () => {
+        const query = searchInput.value.toLowerCase();
+        const filtered = window.allSongs.filter(song =>
+            song.title.toLowerCase().includes(query)
+        );
+        renderSongs(filtered);
+    });
+
+    // DELETE
+    async function deleteSong(id) {
+        const resp = await fetch(`/delete_song/${id}`, { method: "DELETE" });
+        if (resp.ok) fetchSongs();
+    }
+
+  // OPEN EDIT MODAL
+function openEdit(song) {
+    editModal.style.display = "flex";
+
+    document.getElementById("editSongId").value = song.id;
+    document.getElementById("editTitle").value = song.title;
+    document.getElementById("editGenre").value = song.genre;
+
+    // ✅ SHOW CURRENT COVER IMAGE
+    const coverImg = document.getElementById("currentCover");
+    coverImg.src = song.cover_url;
+    coverImg.style.display = "block";
+
+    // ✅ SHOW CURRENT SONG
+    const audio = document.getElementById("currentSong");
+    audio.src = song.audio_url;
+    audio.load();
+}
+
+
+// CLOSE MODAL
+function closeModal() {
+    editModal.style.display = "none";
+}
+
+// SAVE EDIT (FIXED)
+editForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const id = document.getElementById("editSongId").value;
+    const formData = new FormData();
+
+    formData.append("title", document.getElementById("editTitle").value);
+    formData.append("genre", document.getElementById("editGenre").value);
+
+    if (document.getElementById("editCover").files[0]) {
+        formData.append("cover", document.getElementById("editCover").files[0]);
+    }
+
+    if (document.getElementById("editSongFile").files[0]) {
+        formData.append("song_file", document.getElementById("editSongFile").files[0]);
+    }
+
+    const resp = await fetch(`/edit_song/${id}`, {   // ✅ FIXED URL
+        method: "POST",
+        body: formData
+    });
+
+    if (resp.ok) {
+        closeModal();
+        window.location.href = "/creator_dashboard"; // ✅ redirect
+    }
+});
+
+
+    // ADD SONG
+    songForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const data = new FormData(songForm);
+
+        const resp = await fetch("/add_song", { method: "POST", body: data });
+        if (resp.ok) {
+            fetchSongs();
+            songForm.reset();
+        }
+    });
+
+    fetchSongs();
+    </script>
+
+</body>
+</html>
